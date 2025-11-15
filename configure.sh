@@ -1,0 +1,9 @@
+#!/bin/bash
+
+rm -rf ./build CMakeUserPresets.json
+
+conan install . --build=missing
+conan install . --build=missing -s build_type=Debug
+cmake --preset conan-release
+cmake --preset conan-debug
+
