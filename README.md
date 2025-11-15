@@ -1,6 +1,8 @@
 # GPS_PI_OLED_cpp
 GPS implementation in C++ using Raspberry Pi with SSD1306 OLED display
 
+![Raspberry Pi 4B showing GPS module and SSD1306 display](images/Pi_GPS_OLED.jpg)
+
 - Background
 
   This project is a port of my Raspberry Pi Pico RP2040 application.
