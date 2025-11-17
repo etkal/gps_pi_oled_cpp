@@ -9,6 +9,7 @@
 
 #include "ssd1306.h"
 #include "gps.h"
+#include "led.h"
 
 #include <stdio.h>
 #include <memory>
@@ -24,7 +25,7 @@ class GPS_OLED
 public:
     typedef std::shared_ptr<GPS_OLED> Shared;
 
-    GPS_OLED(SSD1306::Shared spDisplay, GPS::Shared spGPS, float GMToffset = 0.0);
+    GPS_OLED(SSD1306::Shared spDisplay, GPS::Shared spGPS, LED::Shared spLED, float GMToffset = 0.0);
     ~GPS_OLED();
 
     void Initialize();
@@ -52,6 +53,7 @@ private:
 
     SSD1306::Shared m_spDisplay;
     GPS::Shared m_spGPS;
+    LED::Shared m_spLED;
     float m_GMToffset;
 
     GPSData::Shared m_spGPSData;
