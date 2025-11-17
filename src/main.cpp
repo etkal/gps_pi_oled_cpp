@@ -24,6 +24,7 @@
 #include <iostream>
 #include <stdio.h>
 
+#include "led.h"
 #include "gps.h"
 #include "gps_oled.h"
 
@@ -56,12 +57,9 @@ int main()
     sa.sa_handler = signalHandler; // Set the custom handler function
     sigemptyset(&sa.sa_mask);      // Clear the signal mask
     sa.sa_flags = 0;               // No special flags
-    // Register the signal handler for SIGINT
-    if (sigaction(SIGINT, &sa, NULL) == -1)
-    {
-        std::cerr << "Error registering signal handler." << std::endl;
-        return 1;
-    }
+    // Register the signal handler for SIGINT/SIGTERM
+    sigaction(SIGINT, &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
 
     // Create the GPS object
     GPS::Shared spGPS = std::make_shared<GPS>(GPS_DEVICE);
@@ -70,11 +68,21 @@ int main()
         return 1;
     }
 
+    LED::Shared spLED;
+#if defined(ENABLE_WS2812)
+    // Create the LED object
+    spLED = std::make_shared<LED_neo>(1);
+    if (0 != spLED->Initialize())
+    {
+        spLED.reset();
+    }
+#endif
+
     // Create the display
     SSD1306::Shared spDisplay = std::make_shared<SSD1306_I2C>(128, 64, I2C_BUS, I2C_DEVICE);
 
     // Create the GPS_OLED display object
-    sg_spDevice = std::make_shared<GPS_OLED>(spDisplay, spGPS, GPSD_GMT_OFFSET);
+    sg_spDevice = std::make_shared<GPS_OLED>(spDisplay, spGPS, spLED, GPSD_GMT_OFFSET);
 
     sg_spDevice->Initialize();
     // Run the show

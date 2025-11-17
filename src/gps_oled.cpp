@@ -29,10 +29,10 @@
 #include <iomanip>
 #include <thread>
 
-#include <stdio.h>
-
 #include "ssd1306.h"
 #include "gps_oled.h"
+
+#include "ws281x/ws2811.h"
 
 #define SAT_ICON_RADIUS 2
 
@@ -49,9 +49,10 @@ constexpr uint X_PAD       = 0;
 
 constexpr double pi = 3.14159265359;
 
-GPS_OLED::GPS_OLED(SSD1306::Shared spDisplay, GPS::Shared spGPS, float GMToffset)
+GPS_OLED::GPS_OLED(SSD1306::Shared spDisplay, GPS::Shared spGPS, LED::Shared spLED, float GMToffset)
     : m_spDisplay(spDisplay),
       m_spGPS(spGPS),
+      m_spLED(spLED),
       m_GMToffset(GMToffset)
 {
 }
@@ -102,6 +103,18 @@ void GPS_OLED::gpsDataCB(void* pCtx, GPSData::Shared spGPSData)
 void GPS_OLED::updateUI(GPSData::Shared spGPSData)
 {
     m_spGPSData = spGPSData;
+    if (m_spLED)
+    {
+        if (m_spGPSData->bHasPosition)
+        {
+            m_spLED->SetPixel(0, m_spGPSData->bExternalAntenna ? led_blue : led_green);
+        }
+        else
+        {
+            m_spLED->SetPixel(0, led_red);
+        }
+        m_spLED->Blink_ms(20);
+    }
 
     uint16_t nWidth  = m_spDisplay->Width();
     uint16_t nHeight = m_spDisplay->Height();
