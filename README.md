@@ -16,10 +16,22 @@ GPS implementation in C++ using Raspberry Pi with SSD1306 OLED display
 - Software Requirements
 
   Raspberry Pi, conan install using conancenter repo (for boost).
+  If using cmake without conan install a boost version 1.80 or later (bookworm does not come with but seems to support 1.81):
+  ```
+  sudo apt install libboost1.81-dev
+  ```
 
   For conan run the ./configure.sh script, then open with VS Code, or build from command line:
   ```
   cmake --build --preset conan-release
+  ```
+  If using cmake directly, for command line example:
+  ```
+  rm -rf ./build
+  mkdir ./build
+  cd ./build
+  cmake .. -DCMAKE_BUILD_TYPE=Release
+  cmake --build .
   ```
 
   For remote development and debug use VS Code and install the `Remote - SSH` extension.
@@ -32,7 +44,7 @@ GPS implementation in C++ using Raspberry Pi with SSD1306 OLED display
 
 - Operation
 
-  In main.cpp the required abstraction objects are created, and the program reads NMEA 0183 sentences from the GPS serial port.
+  In main.cpp the required abstraction objects are created, and the program reads NMEA 0183 sentences from the GPS serial port. Boost::asio is used for threading, e.g. for the LED blink a timer is used to turn the LED back off instead of using an inline sleep that might affect the serial port GPS data reads.
 
   The data is correlated and displayed in textual and graphical form on the display.  For the SSD1306 it displays the latitude, longitude, altitude, GMT time and an indication of the number of satellites and fix type.  A graphical representation of the satellite positions is displayed as well.
 
