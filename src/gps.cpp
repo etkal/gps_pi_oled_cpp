@@ -63,8 +63,9 @@ size_t GPS::sm_iHead      = 0;
 size_t GPS::sm_iNext      = 0;
 size_t GPS::sm_nSentences = 0;
 
-GPS::GPS(const char* szDevice)
-    : m_strDevice(szDevice),
+GPS::GPS(boost::asio::io_context& ioc, const char* szDevice)
+    : m_ioc(ioc),
+      m_strDevice(szDevice),
       m_serialPort(-1),
       m_bExit(false),
       m_bGSVInProgress(false),

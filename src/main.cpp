@@ -23,6 +23,9 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <vector>
+#include <thread>
+#include <boost/asio.hpp>
 
 #include "led.h"
 #include "gps.h"
@@ -60,9 +63,23 @@ int main()
     // Register the signal handler for SIGINT/SIGTERM
     sigaction(SIGINT, &sa, NULL);
     sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGKILL, &sa, NULL);
+
+    // Set up the thread pool
+    boost::asio::io_context ioc;
+    boost::asio::executor_work_guard<boost::asio::io_context::executor_type> work_guard(ioc.get_executor());
+    // Create a pool of worker threads
+    const int num_threads = 2;
+    std::vector<std::thread> threads;
+    for (int i = 0; i < num_threads; ++i)
+    {
+        threads.emplace_back([&ioc]() {
+            ioc.run(); // Each thread calls run() to process handlers
+        });
+    }
 
     // Create the GPS object
-    GPS::Shared spGPS = std::make_shared<GPS>(GPS_DEVICE);
+    GPS::Shared spGPS = std::make_shared<GPS>(ioc, GPS_DEVICE);
     if (0 != spGPS->Initialize())
     {
         return 1;
@@ -71,7 +88,7 @@ int main()
     LED::Shared spLED;
 #if defined(ENABLE_WS2812)
     // Create the LED object
-    spLED = std::make_shared<LED_neo>(1);
+    spLED = std::make_shared<LED_neo>(ioc, 1);
     if (0 != spLED->Initialize())
     {
         spLED.reset();
@@ -85,8 +102,16 @@ int main()
     sg_spDevice = std::make_shared<GPS_OLED>(spDisplay, spGPS, spLED, GPSD_GMT_OFFSET);
 
     sg_spDevice->Initialize();
+
     // Run the show
     sg_spDevice->Run();
+    work_guard.reset();
+
+    // Wait for all worker threads to finish
+    for (std::thread& t : threads)
+    {
+        t.join();
+    }
 
     return 0;
 }

@@ -8,13 +8,13 @@ required_conan_version = ">=2.21.0"
 
 class GPS_OLED(ConanFile):
     settings = "os", "arch", "compiler", "build_type"
-    # default_options = {"boost/*:shared": False}
+    default_options = {"boost/*:shared": False}
 
     def layout(self):
         cmake_layout(self)
     
-    # def requirements(self):
-        # self.requires("boost/1.88.0")
+    def requirements(self):
+        self.requires("boost/1.88.0")
 
     def generate(self):
         tc = CMakeToolchain(self)

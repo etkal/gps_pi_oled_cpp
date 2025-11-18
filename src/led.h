@@ -9,6 +9,9 @@
 
 #include <vector>
 #include <memory>
+#include <chrono>
+#include <thread>
+#include <boost/asio.hpp>
 
 auto constexpr max_lum = 100;
 
@@ -34,7 +37,7 @@ class LED
 public:
     typedef std::shared_ptr<LED> Shared;
 
-    LED() {};
+    LED(boost::asio::io_context& ioc);
     virtual ~LED() {};
 
     virtual int Initialize()                          = 0;
@@ -43,12 +46,16 @@ public:
     virtual void SetPixel(size_t idx, uint32_t color) = 0;
     virtual void SetIgnore(std::vector<uint32_t> vIgnore) {};
     void Blink_ms(size_t nMs = 50);
+
+private:
+    boost::asio::io_context& m_ioc;
+    boost::asio::steady_timer m_timer;
 };
 
 class LED_neo : public LED
 {
 public:
-    LED_neo(size_t numLEDs, bool bIsRGBW = false);
+    LED_neo(boost::asio::io_context& ioc, size_t numLEDs, bool bIsRGBW = false);
     virtual ~LED_neo();
 
     int Initialize() override;

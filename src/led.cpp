@@ -9,6 +9,8 @@
 #include "ws281x/ws2811.h"
 
 #include <thread>
+#include <boost/asio/steady_timer.hpp>
+#include <boost/system/error_code.hpp>
 
 // defaults for cmdline options
 #define TARGET_FREQ WS2811_TARGET_FREQ
@@ -36,16 +38,30 @@ static ws2811_t ledstring = {
                 }, },
 };
 
+LED::LED(boost::asio::io_context& ioc)
+    : m_ioc(ioc),
+      m_timer(ioc) {};
 
 void LED::Blink_ms(size_t nMs)
 {
     On();
-    std::this_thread::sleep_for(std::chrono::milliseconds(nMs));
-    Off();
+    m_timer.expires_after(std::chrono::milliseconds(nMs));
+    m_timer.async_wait([this](const boost::system::error_code& error) {
+        if (!error)
+        {
+            Off();
+        }
+        else
+        {
+            fprintf(stderr, "Timer error: %s\n", error.message().c_str());
+            Off();
+        }
+    });
 }
 
-LED_neo::LED_neo(size_t numLEDs, bool bIsRGBW)
-    : m_bInitialized(false),
+LED_neo::LED_neo(boost::asio::io_context& ioc, size_t numLEDs, bool bIsRGBW)
+    : LED(ioc),
+      m_bInitialized(false),
       m_nNumLEDs(numLEDs),
       m_bIsRGBW(bIsRGBW)
 {
