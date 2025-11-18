@@ -13,6 +13,8 @@
 #include <map>
 #include <memory>
 #include <chrono>
+#include <thread>
+#include <boost/asio.hpp>
 
 #define ChronoTimePoint std::chrono::system_clock::time_point
 
@@ -74,7 +76,7 @@ class GPS
 public:
     typedef std::shared_ptr<GPS> Shared;
 
-    GPS(const char* szDevice);
+    GPS(boost::asio::io_context& ioc, const char* szDevice);
     ~GPS();
 
     void SetSentenceCallback(void* pCtx, sentenceCallback pCB);
@@ -93,6 +95,7 @@ private:
     std::string convertToDegrees(std::string strRaw, int width);
     void receiveData();
 
+    boost::asio::io_context& m_ioc;
     std::string m_strDevice;
     int m_serialPort;
 

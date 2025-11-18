@@ -113,7 +113,7 @@ void GPS_OLED::updateUI(GPSData::Shared spGPSData)
         {
             m_spLED->SetPixel(0, led_red);
         }
-        m_spLED->Blink_ms(20);
+        m_spLED->Blink_ms(10);
     }
 
     uint16_t nWidth  = m_spDisplay->Width();

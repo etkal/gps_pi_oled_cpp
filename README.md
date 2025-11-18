@@ -15,18 +15,20 @@ GPS implementation in C++ using Raspberry Pi with SSD1306 OLED display
   
 - Software Requirements
 
-  Raspberry Pi, conan install using conancenter repo (for boost, not currently using).
+  Raspberry Pi, conan install using conancenter repo (for boost).
 
-  For conan run the ./configure.sh script, then open with VS Code or such.
+  For conan run the ./configure.sh script, then open with VS Code, or build from command line:
+  ```
+  cmake --build --preset conan-release
+  ```
 
-  Or just use cmake, for command line example:
-```
-  rm -rf ./build
-  mkdir ./build
-  cd ./build
-  cmake .. -DCMAKE_BUILD_TYPE=Release
-  cmake --build .
-```
+  For remote development and debug use VS Code and install the `Remote - SSH` extension.
+
+  Since gps_oled requires sudo for LED operation, copy the binary to a standard location like `/user/local/bin` and run:
+  ```
+  sudo chown root:root /usr/local/bin/gps_oled
+  sudo chmod u+s /usr/local/bin/gps_oled
+  ```
 
 - Operation
 
